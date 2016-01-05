@@ -1,5 +1,5 @@
 Meme Creator
 ==================
-My Swift journey continues.
+Everyone loves a good meme.
 
-This is a simple app that allows you to create a Meme. Who doesn't love memes 😀    
+Meme Creator allows you to create a Meme and share it with friends.🤓     
