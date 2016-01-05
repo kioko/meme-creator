@@ -9,12 +9,18 @@
 import UIKit
 
 class ViewController: UIViewController,UIImagePickerControllerDelegate,
-UINavigationControllerDelegate{
+UINavigationControllerDelegate, UITextFieldDelegate{
     
-    
+    /* Global variable definitions */
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var albumButton: UITabBarItem!
     @IBOutlet weak var cameraButton: UITabBarItem!
+    
+    @IBOutlet weak var navBar: UINavigationBar!
+    @IBOutlet weak var topText: UITextField!
+    @IBOutlet weak var bottomText: UITextField!
+    
+    var userIsEditing = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -97,6 +103,12 @@ UINavigationControllerDelegate{
         let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
         return keyboardSize.CGRectValue().height
     }
+    
+    /* Hide status bar to avoid bug where status bar shows when imageview pushed up by keyboard */
+    override func prefersStatusBarHidden() -> Bool {
+        return true
+    }
+
     
 }
 
