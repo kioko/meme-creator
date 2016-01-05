@@ -126,6 +126,18 @@ UINavigationControllerDelegate, UITextFieldDelegate{
     Otherwise, configure default state for text fields 
     */
     func setDefaultUIState() {
+        //text style attributes
+        let memeTextAttributes = [
+            NSStrokeColorAttributeName : UIColor.blackColor(),
+            NSForegroundColorAttributeName : UIColor.whiteColor(),
+            NSFontAttributeName : UIFont(name: "HelveticaNeue-CondensedBlack", size: 40)!,
+            NSStrokeWidthAttributeName : 0.0
+        ]
+        
+        self.topText.delegate = self;
+        self.bottomText.delegate = self;
+        self.topText.defaultTextAttributes = memeTextAttributes
+        self.bottomText.defaultTextAttributes = memeTextAttributes
         
         /* Set the meme to edit if there is an editMeme */
         if let editMeme = editMeme {
