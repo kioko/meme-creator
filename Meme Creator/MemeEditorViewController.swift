@@ -19,8 +19,12 @@ UINavigationControllerDelegate, UITextFieldDelegate{
     @IBOutlet weak var navBar: UINavigationBar!
     @IBOutlet weak var topText: UITextField!
     @IBOutlet weak var bottomText: UITextField!
+    @IBOutlet weak var navSaveButton: UIBarButtonItem!
+    @IBOutlet weak var navCancelButton: UIBarButtonItem!
+    @IBOutlet weak var bottomToolbar: UIToolbar!
     
     var editMeme: Meme?
+    var memedImage: UIImage!
     var userIsEditing = false
     
     override func viewDidLoad() {
@@ -112,18 +116,18 @@ UINavigationControllerDelegate, UITextFieldDelegate{
         return keyboardSize.CGRectValue().height
     }
     
-    /* 
-    Hide status bar to avoid bug where status bar shows when imageview pushed 
-    up by keyboard 
+    /*
+    Hide status bar to avoid bug where status bar shows when imageview pushed
+    up by keyboard
     */
     override func prefersStatusBarHidden() -> Bool {
         return false
     }
     
-    /* 
+    /*
     Set the state of the User Interface to editing or creating
     If you are editing a Meme, then configure and set the appropriate fields
-    Otherwise, configure default state for text fields 
+    Otherwise, configure default state for text fields
     */
     func setDefaultUIState() {
         //text style attributes
@@ -147,11 +151,16 @@ UINavigationControllerDelegate, UITextFieldDelegate{
             bottomText.text = editMeme.bottomText
             imageView.image = editMeme.originalImage
             
+            navCancelButton.enabled = true
+            navSaveButton.enabled = userCanSave()
+            
             
             userIsEditing = true
         } else {
-            //Set the title if creating a Meme */
+            /*Set the title if creating a Meme */
             navBar.topItem?.title = "Create a Meme"
+            navCancelButton.enabled = true
+            navSaveButton.enabled = userCanSave()
         }
         
     }
@@ -161,6 +170,57 @@ UINavigationControllerDelegate, UITextFieldDelegate{
         self.view.endEditing(true)
         return false
     }
+    @IBAction func saveEditedMeme(sender: AnyObject) {
+        
+        if userCanSave(){
+            /* Initialize a new meme to save or update */
+            let meme = Meme(topText: topText.text!, bottomText: bottomText.text!,
+                originalImage: imageView.image!, memedImage: generateMemedImage())
+        }
+    }
     
+    
+    @IBAction func cancelEditiedMeme(sender: UIBarButtonItem) {
+        clearView()
+    }
+    
+    /* Clear the view if user presses cancel */
+    func clearView() {
+        imageView.image = nil
+        topText.text = nil
+        bottomText.text = nil
+    }
+    
+    /* Test to see whether the user can save or not */
+    func userCanSave() -> Bool {
+        if topText.text == nil || bottomText.text == nil || imageView.image == nil {
+            return false
+        } else {
+            return true
+        }
+    }
+    
+    func generateMemedImage() -> UIImage
+    {
+        /* Hide everything but the image */
+        hideNavItems(true)
+        
+        // Render view to an image
+        UIGraphicsBeginImageContext(self.view.frame.size)
+        self.view.drawViewHierarchyInRect(self.view.frame, afterScreenUpdates: true)
+        let memedImage : UIImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        /* Show all views that were hidden */
+        hideNavItems(false)
+        
+        return memedImage
+    }
+    
+    private func hideNavItems(hide: Bool){
+        navigationController?.setNavigationBarHidden(hide, animated: false)
+        navBar.hidden = hide
+        bottomToolbar.hidden = hide
+    }
 }
 
