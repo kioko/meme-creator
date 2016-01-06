@@ -222,5 +222,17 @@ UINavigationControllerDelegate, UITextFieldDelegate{
         navBar.hidden = hide
         bottomToolbar.hidden = hide
     }
+    
+    /* Present the ActivityViewController programmatically to share a Meme */
+    @IBAction func shareMeme(sender: UIBarButtonItem) {
+        
+        let ac = UIActivityViewController(activityItems: [generateMemedImage()], applicationActivities: nil)
+        ac.completionWithItemsHandler = { activity, success, items, error in
+            if success {
+                self.saveEditedMeme(self)
+            }
+        }
+        presentViewController(ac, animated: true, completion: nil)
+    }
 }
 
