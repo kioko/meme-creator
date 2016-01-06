@@ -3,13 +3,14 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9529"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
         <!--Meme Creator-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
                 <viewController id="BYZ-38-t0r" customClass="MemeEditorViewController" customModule="Meme_Creator" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="y3c-jy-aDJ"/>
@@ -22,7 +23,8 @@
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xl7-21-KEm">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                 <items>
-                                    <barButtonItem tag="1" title="Pick Image" id="51e-qf-AQE">
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="7tR-i2-U6q"/>
+                                    <barButtonItem tag="1" image="Image" id="51e-qf-AQE">
                                         <connections>
                                             <action selector="pickImageFromGallery:" destination="BYZ-38-t0r" id="JCK-Um-qKh"/>
                                         </connections>
@@ -45,24 +47,30 @@
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XDD-oH-1GK">
                                 <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                                 <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                <variation key="widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="0.0" y="64" width="400" height="492"/>
-                                </variation>
                             </imageView>
                             <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="fill" contentVerticalAlignment="center" placeholder="Bottom Text" textAlignment="center" clearsOnBeginEditing="YES" minimumFontSize="35" translatesAutoresizingMaskIntoConstraints="NO" id="kaq-R5-9HP">
                                 <rect key="frame" x="-25" y="-30" width="97" height="30"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="40"/>
                                 <textInputTraits key="textInputTraits"/>
-                                <variation key="widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="0.0" y="510" width="400" height="30"/>
-                                </variation>
                             </textField>
                             <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="aTR-KO-W6M">
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                 <items>
                                     <navigationItem title="Meme Editor" id="7gM-r5-Pvp">
                                         <barButtonItem key="leftBarButtonItem" systemItem="action" id="fNY-qs-r05"/>
+                                        <rightBarButtonItems>
+                                            <barButtonItem image="Save" id="K7f-Zs-s47">
+                                                <connections>
+                                                    <action selector="saveEditedMeme:" destination="BYZ-38-t0r" id="bqW-xD-w7P"/>
+                                                </connections>
+                                            </barButtonItem>
+                                            <barButtonItem image="Cancel" id="wKG-X7-dsc">
+                                                <connections>
+                                                    <action selector="cancelEditiedMeme:" destination="BYZ-38-t0r" id="3JG-jw-5r4"/>
+                                                </connections>
+                                            </barButtonItem>
+                                        </rightBarButtonItems>
                                     </navigationItem>
                                 </items>
                             </navigationBar>
@@ -71,9 +79,6 @@
                                 <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="40"/>
                                 <textInputTraits key="textInputTraits"/>
-                                <variation key="widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="0.0" y="123" width="400" height="63"/>
-                                </variation>
                             </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
@@ -92,7 +97,6 @@
                             <constraint firstItem="XDD-oH-1GK" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-20" id="gYn-Zu-Bib"/>
                             <constraint firstItem="Igh-Tf-But" firstAttribute="top" secondItem="aTR-KO-W6M" secondAttribute="bottom" constant="59" id="h4a-0E-KDi"/>
                             <constraint firstAttribute="trailingMargin" secondItem="XDD-oH-1GK" secondAttribute="trailing" constant="-20" id="hRq-kp-x94"/>
-                            <constraint firstItem="xl7-21-KEm" firstAttribute="top" secondItem="XDD-oH-1GK" secondAttribute="bottom" constant="271" id="kaZ-3c-7wu"/>
                             <constraint firstItem="XDD-oH-1GK" firstAttribute="top" secondItem="aTR-KO-W6M" secondAttribute="bottom" id="nSn-d1-l9s"/>
                             <constraint firstItem="aTR-KO-W6M" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="-20" id="qcm-dc-pgg"/>
                             <constraint firstAttribute="trailingMargin" secondItem="xl7-21-KEm" secondAttribute="trailing" constant="-20" id="qzY-Pk-o0d"/>
@@ -108,25 +112,24 @@
                                 <exclude reference="Igh-Tf-But"/>
                             </mask>
                             <mask key="constraints">
-                                <exclude reference="3sh-DR-ye9"/>
-                                <exclude reference="qcm-dc-pgg"/>
-                                <exclude reference="KMo-0A-0bb"/>
-                                <exclude reference="gYn-Zu-Bib"/>
-                                <exclude reference="hRq-kp-x94"/>
-                                <exclude reference="nSn-d1-l9s"/>
+                                <exclude reference="Fhu-ex-Fyg"/>
+                                <exclude reference="Kf5-Lv-TvP"/>
                                 <exclude reference="0Kz-FA-7iQ"/>
                                 <exclude reference="YRJ-09-fA1"/>
                                 <exclude reference="d6u-WG-uek"/>
                                 <exclude reference="h4a-0E-KDi"/>
                                 <exclude reference="G8y-NT-axO"/>
                                 <exclude reference="tps-Mu-qhu"/>
+                                <exclude reference="3sh-DR-ye9"/>
+                                <exclude reference="qcm-dc-pgg"/>
                                 <exclude reference="842-qz-hr0"/>
                                 <exclude reference="XSz-ia-Bit"/>
                                 <exclude reference="ZD6-rf-0aH"/>
-                                <exclude reference="kaZ-3c-7wu"/>
                                 <exclude reference="qzY-Pk-o0d"/>
-                                <exclude reference="Fhu-ex-Fyg"/>
-                                <exclude reference="Kf5-Lv-TvP"/>
+                                <exclude reference="KMo-0A-0bb"/>
+                                <exclude reference="gYn-Zu-Bib"/>
+                                <exclude reference="hRq-kp-x94"/>
+                                <exclude reference="nSn-d1-l9s"/>
                             </mask>
                         </variation>
                         <variation key="widthClass=compact">
@@ -138,26 +141,25 @@
                                 <include reference="Igh-Tf-But"/>
                             </mask>
                             <mask key="constraints">
-                                <include reference="3sh-DR-ye9"/>
-                                <include reference="qcm-dc-pgg"/>
-                                <include reference="tqc-Ey-Bni"/>
-                                <include reference="KMo-0A-0bb"/>
-                                <include reference="gYn-Zu-Bib"/>
-                                <include reference="hRq-kp-x94"/>
-                                <include reference="nSn-d1-l9s"/>
+                                <include reference="Fhu-ex-Fyg"/>
+                                <include reference="Kf5-Lv-TvP"/>
                                 <include reference="0Kz-FA-7iQ"/>
                                 <include reference="YRJ-09-fA1"/>
                                 <include reference="d6u-WG-uek"/>
                                 <include reference="h4a-0E-KDi"/>
                                 <include reference="G8y-NT-axO"/>
                                 <include reference="tps-Mu-qhu"/>
+                                <include reference="3sh-DR-ye9"/>
+                                <include reference="qcm-dc-pgg"/>
+                                <include reference="tqc-Ey-Bni"/>
                                 <include reference="842-qz-hr0"/>
                                 <include reference="XSz-ia-Bit"/>
                                 <include reference="ZD6-rf-0aH"/>
-                                <include reference="kaZ-3c-7wu"/>
                                 <include reference="qzY-Pk-o0d"/>
-                                <include reference="Fhu-ex-Fyg"/>
-                                <include reference="Kf5-Lv-TvP"/>
+                                <include reference="KMo-0A-0bb"/>
+                                <include reference="gYn-Zu-Bib"/>
+                                <include reference="hRq-kp-x94"/>
+                                <include reference="nSn-d1-l9s"/>
                             </mask>
                         </variation>
                     </view>
@@ -169,12 +171,16 @@
                     <connections>
                         <outlet property="albumButton" destination="9tH-gz-GA0" id="imh-sO-hAZ"/>
                         <outlet property="bottomText" destination="kaq-R5-9HP" id="CZu-Gl-pmg"/>
+                        <outlet property="bottomToolbar" destination="xl7-21-KEm" id="7B0-uZ-fUO"/>
                         <outlet property="cameraButton" destination="PEV-wM-8gF" id="D5e-Sp-uOQ"/>
                         <outlet property="imageView" destination="XDD-oH-1GK" id="pRo-ge-J13"/>
                         <outlet property="navBar" destination="aTR-KO-W6M" id="Afi-7W-Ycg"/>
+                        <outlet property="navCancelButton" destination="wKG-X7-dsc" id="M8E-9r-kBa"/>
+                        <outlet property="navSaveButton" destination="K7f-Zs-s47" id="6CK-eX-PPn"/>
                         <outlet property="topText" destination="Igh-Tf-But" id="i6S-96-S7y"/>
                     </connections>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1212" y="-353"/>
         </scene>
@@ -182,5 +188,8 @@
     <resources>
         <image name="Album" width="22" height="22"/>
         <image name="Camera" width="22" height="22"/>
+        <image name="Cancel" width="24" height="24"/>
+        <image name="Image" width="24" height="24"/>
+        <image name="Save" width="24" height="24"/>
     </resources>
 </document>
