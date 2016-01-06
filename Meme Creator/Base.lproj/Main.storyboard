@@ -58,7 +58,11 @@
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                                 <items>
                                     <navigationItem title="Meme Editor" id="7gM-r5-Pvp">
-                                        <barButtonItem key="leftBarButtonItem" systemItem="action" id="fNY-qs-r05"/>
+                                        <barButtonItem key="leftBarButtonItem" systemItem="action" id="fNY-qs-r05">
+                                            <connections>
+                                                <action selector="shareMeme:" destination="BYZ-38-t0r" id="3oT-u4-DGX"/>
+                                            </connections>
+                                        </barButtonItem>
                                         <rightBarButtonItems>
                                             <barButtonItem image="Save" id="K7f-Zs-s47">
                                                 <connections>
