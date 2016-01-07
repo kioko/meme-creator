@@ -111,6 +111,7 @@
                     </collectionView>
                     <navigationItem key="navigationItem" id="zNL-0Q-bs9"/>
                     <connections>
+                        <outlet property="flowLayOut" destination="dWm-6q-KNa" id="kCZ-NV-ofr"/>
                         <outlet property="memeCollectionView" destination="lqE-Nu-kFl" id="3Wq-6y-D5B"/>
                         <segue destination="vPH-dm-r0V" kind="show" identifier="showMemeDetail" id="qI7-pw-Avq"/>
                     </connections>
@@ -442,6 +443,6 @@
         <image name="Table" width="30" height="30"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="xgr-mc-767"/>
+        <segue reference="qI7-pw-Avq"/>
     </inferredMetricsTieBreakers>
 </document>
