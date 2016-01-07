@@ -11,6 +11,7 @@ import UIKit
 class MemeCollectionViewController: UICollectionViewController {
     
     @IBOutlet var memeCollectionView: UICollectionView!
+     @IBOutlet weak var flowLayOut: UICollectionViewFlowLayout!
     
     var edgeSpacing = 5.0
     let minimumSpacing: CGFloat = 5.0
@@ -26,6 +27,15 @@ class MemeCollectionViewController: UICollectionViewController {
         super.viewDidLoad()
         /*  Allow multi selection of cells */
         memeCollectionView.allowsMultipleSelection = true
+        
+        let layoutSpace : CGFloat = 3.0
+        let widthDimension = (self.view.frame.size.width - (2 * layoutSpace)) / 3.0
+        let heightDimension = (self.view.frame.size.height - (2 * layoutSpace)) / 3.0
+        flowLayOut.minimumLineSpacing = layoutSpace
+        flowLayOut.minimumInteritemSpacing = layoutSpace
+        //Set the size of the cells
+        flowLayOut.itemSize = CGSizeMake(widthDimension, heightDimension)
+        
     }
     
     override func viewWillAppear(animated: Bool) {
