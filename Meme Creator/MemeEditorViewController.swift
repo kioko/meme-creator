@@ -21,7 +21,10 @@ UINavigationControllerDelegate, UITextFieldDelegate{
     @IBOutlet weak var bottomText: UITextField!
     @IBOutlet weak var navSaveButton: UIBarButtonItem!
     @IBOutlet weak var navCancelButton: UIBarButtonItem!
+    @IBOutlet weak var navShareButton: UIBarButtonItem!
     @IBOutlet weak var bottomToolbar: UIToolbar!
+    
+    var selectedTextField: UITextField?
     
     var editMeme: Meme?
     var memedImage: UIImage!
@@ -30,13 +33,15 @@ UINavigationControllerDelegate, UITextFieldDelegate{
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //Congifure the UI to its default state
         self.setDefaultUIState()
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         // Subscribe to keyboard notifications to allow the view to raise when necessary
-        self.subscribeToKeyboardNotifications()
+        self.subscribeToKeyboardNotification()
+        self.subscribeToShakeNotifications()
         
         //Check if the camera is available then enable/disable the camera button
         cameraButton.enabled = UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.Camera)
@@ -44,7 +49,8 @@ UINavigationControllerDelegate, UITextFieldDelegate{
     
     override func viewWillDisappear(animated: Bool) {
         super.viewWillDisappear(animated)
-        self.unsubscribeFromKeyboardNotifications() //Disable keyboard notifications
+        self.unsubsribeToKeyboardNotification() //Disable keyboard notifications
+        self.unsubsribeToShakeNotification()
     }
     
     //Allow the user to select an image from the gallery
@@ -73,48 +79,6 @@ UINavigationControllerDelegate, UITextFieldDelegate{
         self.presentViewController(imagePicker, animated: true, completion: nil)
     }
     
-    
-    /**
-     This function enables us to retrieve the selected image and set it to the
-     ImageView
-     */
-    func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject]) {
-        
-        if let image = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            imageView.image = image
-            self.dismissViewControllerAnimated(true, completion: nil)
-        }
-    }
-    
-    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
-        self.dismissViewControllerAnimated(true, completion: nil)
-    }
-    
-    func subscribeToKeyboardNotifications() {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
-    }
-    
-    func unsubscribeFromKeyboardNotifications(){
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().removeObserver(self, name: UIKeyboardWillHideNotification, object: nil)
-    }
-    
-    func keyboardWillShow(notification: NSNotification) {
-        self.view.frame.origin.y -= getKeyboardHeight(notification)
-    }
-    
-    
-    /* Reset view origin when keyboard hides */
-    func keyboardWillHide(notification: NSNotification) {
-        self.view.frame.origin.y = 0
-    }
-    
-    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
-        let userInfo = notification.userInfo
-        let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue // of CGRect
-        return keyboardSize.CGRectValue().height
-    }
     
     /*
     Hide status bar to avoid bug where status bar shows when imageview pushed
@@ -151,9 +115,10 @@ UINavigationControllerDelegate, UITextFieldDelegate{
             bottomText.text = editMeme.bottomText
             imageView.image = editMeme.originalImage
             
-            navCancelButton.enabled = true
-            navSaveButton.enabled = userCanSave()
-            
+            /* Hide or Show the buttons based on whether the user is editing */
+            navShareButton.enabled = userIsEditing
+            navCancelButton.enabled = userIsEditing
+            navSaveButton.enabled = userIsEditing
             
             userIsEditing = true
         } else {
@@ -163,25 +128,24 @@ UINavigationControllerDelegate, UITextFieldDelegate{
             navSaveButton.enabled = userCanSave()
         }
         
-    }
-    
-    /** This function hides the keyboard when the user hits return**/
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        self.view.endEditing(true)
-        return false
-    }
-    @IBAction func saveEditedMeme(sender: AnyObject) {
-        
-        if userCanSave(){
-            /* Initialize a new meme to save or update */
-            let meme = Meme(topText: topText.text!, bottomText: bottomText.text!,
-                originalImage: imageView.image!, memedImage: generateMemedImage())
-        }
+        /* Hide or Show the buttons based on whether the user is editing */
+        navShareButton.enabled = userIsEditing
+        navCancelButton.enabled = userIsEditing
+        navSaveButton.enabled = userIsEditing
     }
     
     
     @IBAction func cancelEditiedMeme(sender: UIBarButtonItem) {
         clearView()
+    }
+    
+    /* Alert the user if something is missing from the meme when they try to save */
+    func alertUser(title: String! = "Title", message: String?, actions: [UIAlertAction]) {
+        let ac = UIAlertController(title: title, message: message, preferredStyle: .Alert)
+        for action in actions {
+            ac.addAction(action)
+        }
+        presentViewController(ac, animated: true, completion: nil)
     }
     
     /* Clear the view if user presses cancel */
@@ -226,13 +190,185 @@ UINavigationControllerDelegate, UITextFieldDelegate{
     /* Present the ActivityViewController programmatically to share a Meme */
     @IBAction func shareMeme(sender: UIBarButtonItem) {
         
-        let ac = UIActivityViewController(activityItems: [generateMemedImage()], applicationActivities: nil)
+        let ac = UIActivityViewController(activityItems: [generateMemedImage()],
+            applicationActivities: nil)
         ac.completionWithItemsHandler = { activity, success, items, error in
             if success {
-                self.saveEditedMeme(self)
+                self.saveMeme(self)
             }
         }
         presentViewController(ac, animated: true, completion: nil)
+    }
+    
+    /* Create the meme and save it to the Meme Model */
+    @IBAction func saveMeme(sender: AnyObject) -> Void {
+        
+        /* Check If all items are filled out */
+        if userCanSave() {
+            
+            /* Initialize a new meme to save or update */
+            let meme = Meme(topText: topText.text!, bottomText: bottomText.text!,
+                originalImage: imageView.image!, memedImage: generateMemedImage())
+            
+            /* If you are editing a meme, update it, if new, save it */
+            if userIsEditing {
+                
+                /* Unwrap then update the meme if there is one to update */
+                if let editMeme = editMeme {
+                    MemeCollection.update(atIndex: MemeCollection.indexOf(editMeme), withMeme: meme)
+                }
+                /* Unwind to table view once meme is updated */
+                performSegueWithIdentifier("unwindMemeEditor", sender: sender)
+                
+            } else {
+                /* Add the Meme if user is not editing */
+                MemeCollection.add(meme)
+                dismissViewControllerAnimated(true, completion: nil)
+            }
+        } else {
+            /* Alert user if something is missing and you can't save */
+            let okAction = UIAlertAction(title: "Save", style: .Default, handler: { Void in
+                self.topText.text = ""
+                self.bottomText.text = ""
+                return
+            })
+            let editAction = UIAlertAction(title: "Edit", style: .Default, handler: nil)
+            
+            alertUser(message: "Your meme is missing something.", actions: [okAction, editAction])
+        }
+    }
+    
+    /* Respond to shake notifications and alert to reset text fields to default */
+    func alertForReset() {
+        let ac = UIAlertController(title: "Reset?",
+            message: "Are you sure you want to reset the font size and type?", preferredStyle: .Alert)
+        let resetAction = UIAlertAction(title: "Reset", style: .Default, handler: { Void in
+            
+        })
+        
+        /* Alert user with reset and cancel actions */
+        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil)
+        ac.addAction(resetAction)
+        ac.addAction(cancelAction)
+        presentViewController(ac, animated: true, completion: nil)
+    }
+}
+
+
+//# -- MARK Extend UIImagePickerDelegate Methods for MemeEditorViewController
+extension MemeEditorViewController {
+    
+    /* UIImagePickerDelegate methods */
+    func imagePickerController(picker: UIImagePickerController,
+        didFinishPickingImage image: UIImage, editingInfo: [String : AnyObject]?) {
+            dismissViewControllerAnimated(true, completion: nil)
+            imageView.image = image
+            
+            /* Enable share & cancel buttons once image is returned */
+            navShareButton.enabled = userCanSave()
+            navSaveButton.enabled = userCanSave()
+            navCancelButton.enabled = true
+    }
+    
+    func imagePickerControllerDidCancel(picker: UIImagePickerController) {
+        dismissViewControllerAnimated(true, completion: nil)
+    }
+}
+
+//#-MARK: Extension for the UITextFieldDelegate and Keyboard Notification Methods for MemeEditorViewController
+extension MemeEditorViewController {
+    
+    func textFieldDidBeginEditing(textField: UITextField) {
+        selectedTextField = textField
+    }
+    
+    func textFieldShouldEndEditing(textField: UITextField) -> Bool {
+        return true
+    }
+    
+    /* Configure and deselect text fields when return is pressed */
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        selectedTextField = nil
+        
+        /* Enable save button if fields are filled and resign first responder */
+        navSaveButton.enabled = userCanSave()
+        
+        textField.resignFirstResponder()
+        return true
+    }
+    
+    /* Suscribe the view controller to the UIKeyboardWillShowNotification */
+    func subscribeToKeyboardNotification() {
+        NSNotificationCenter.defaultCenter().addObserver(self,
+            selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self,
+            selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+    }
+    
+    /* Unsubscribe the view controller to the UIKeyboardWillShowNotification */
+    func unsubsribeToKeyboardNotification(){
+        NSNotificationCenter.defaultCenter().removeObserver(self,
+            name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().removeObserver(self,
+            name: UIKeyboardWillHideNotification, object: nil)
+    }
+    /* Hide keyboard when view is tapped */
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        view.endEditing(true)
+        /* Enable save button if fields are filled out  */
+        navSaveButton.enabled = userCanSave()
+    }
+    
+    func keyboardWillShow(notification: NSNotification) {
+        /* slide the view up when keyboard appears, using notifications */
+        if selectedTextField == bottomText && view.frame.origin.y == 0.0 {
+            
+            view.frame.origin.y = -getKeyboardHeight(notification)
+            navSaveButton.enabled = false
+            
+        }
+    }
+    
+    /* Reset view origin when keyboard hides */
+    func keyboardWillHide(notification: NSNotification) {
+        view.frame.origin.y = 0
+        navSaveButton.enabled = userCanSave()
+    }
+    
+    /* Get the height of the keyboard from the user info dictionary */
+    func getKeyboardHeight(notification: NSNotification) -> CGFloat {
+        let userInfo = notification.userInfo
+        let keyboardSize = userInfo![UIKeyboardFrameEndUserInfoKey] as! NSValue
+        return keyboardSize.CGRectValue().height
+    }
+    
+}
+
+
+//#-MARK:Shake to reset Extension of UIViewController:
+extension UIViewController {
+    
+    /* Subsribe to shake notifications */
+    func subscribeToShakeNotifications() {
+        NSNotificationCenter.defaultCenter().addObserver(self,
+            selector: "alertForReset", name: "shake", object: nil)
+    }
+    
+    /* Unsubsribe to shake notifications */
+    func unsubsribeToShakeNotification() {
+        NSNotificationCenter.defaultCenter().removeObserver(self, name: "shake", object: nil)
+    }
+    
+    /* Allow view to become first responder to respond to shake notifications */
+    override public func canBecomeFirstResponder() -> Bool {
+        return true
+    }
+    
+    /* Handle motion events and respond to shake notification */
+    override public func motionEnded(motion: UIEventSubtype, withEvent event: UIEvent?) {
+        if motion == UIEventSubtype.MotionShake {
+            NSNotificationCenter.defaultCenter().postNotificationName("shake", object: self)
+        }
     }
 }
 
